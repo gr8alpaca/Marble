@@ -1,0 +1,28 @@
+[gd_scene load_steps=7 format=3 uid="uid://dtjj734qsvmsl"]
+
+[ext_resource type="Material" uid="uid://jhaskjplml6v" path="res://Resources/GermMaterial.tres" id="1_ium43"]
+[ext_resource type="Script" path="res://Scenes/Germ.gd" id="1_n175m"]
+[ext_resource type="PackedScene" uid="uid://wmf2eu0uuhrg" path="res://addons/third-person-camera/third_person_camera/ThirdPersonCamera.tscn" id="3_ru5uv"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_vd4jx"]
+bounce = 0.1
+absorbent = true
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_816iv"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_4es1v"]
+material = ExtResource("1_ium43")
+
+[node name="Germ" type="RigidBody3D" node_paths=PackedStringArray("cam")]
+physics_material_override = SubResource("PhysicsMaterial_vd4jx")
+can_sleep = false
+script = ExtResource("1_n175m")
+cam = NodePath("ThirdPersonCamera/Camera")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_816iv")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D"]
+mesh = SubResource("SphereMesh_4es1v")
+
+[node name="ThirdPersonCamera" parent="." instance=ExtResource("3_ru5uv")]

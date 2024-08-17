@@ -1,0 +1,43 @@
+[gd_scene load_steps=7 format=3 uid="uid://dyem3h1wscg24"]
+
+[ext_resource type="Texture2D" uid="uid://dw8j32hlp1r1t" path="res://Art/PNG/Dark/texture_13.png" id="1_aflam"]
+[ext_resource type="PackedScene" uid="uid://dtjj734qsvmsl" path="res://Scenes/Germ.tscn" id="2_6cvmw"]
+[ext_resource type="Script" path="res://Scenes/Tiltable.gd" id="2_v2u0f"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ilx1q"]
+albedo_texture = ExtResource("1_aflam")
+uv1_triplanar = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_hby0k"]
+material = SubResource("StandardMaterial3D_ilx1q")
+size = Vector3(20, 1, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_kr26g"]
+margin = 0.1
+size = Vector3(20, 1, 20)
+
+[node name="world" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
+shadow_enabled = true
+shadow_reverse_cull_face = true
+
+[node name="Germ" parent="." instance=ExtResource("2_6cvmw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Floor" type="RigidBody3D" parent="."]
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+mass = 100.0
+angular_damp = 10.0
+script = ExtResource("2_v2u0f")
+tilt_sensitivity = 0.1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_hby0k")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_kr26g")
