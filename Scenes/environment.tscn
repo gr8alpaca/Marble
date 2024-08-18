@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://cecdv12e4pupt"]
+
+[sub_resource type="Environment" id="Environment_8kj2p"]
+background_mode = 1
+ambient_light_source = 2
+ambient_light_color = Color(0.0562916, 0.0562916, 0.0562916, 1)
+ambient_light_energy = 0.01
+tonemap_mode = 2
+ssr_enabled = true
+ssao_enabled = true
+
+[node name="Environment" type="WorldEnvironment"]
+environment = SubResource("Environment_8kj2p")

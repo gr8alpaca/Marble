@@ -1,9 +1,9 @@
 [gd_resource type="StandardMaterial3D" load_steps=5 format=3 uid="uid://jhaskjplml6v"]
 
-[ext_resource type="Texture2D" uid="uid://rfuvv0cx76dk" path="res://Art/Lava/Lava004_1K-PNG_Color.png" id="1_g2cap"]
-[ext_resource type="Texture2D" uid="uid://lshg07p00pw4" path="res://Art/Lava/Lava004_1K-PNG_Emission.png" id="2_rbvuf"]
-[ext_resource type="Texture2D" uid="uid://c3fekir2etgvl" path="res://Art/Lava/Lava004_1K-PNG_Displacement.png" id="3_ouarm"]
-[ext_resource type="Texture2D" uid="uid://cifodaa4qfvv" path="res://Art/Lava/Lava004_1K-PNG_Roughness.png" id="4_sxr2a"]
+[ext_resource type="Texture2D" uid="uid://rfuvv0cx76dk" path="res://Art/MaterialTextures/Lava/Lava004_1K-PNG_Color.png" id="1_g2cap"]
+[ext_resource type="Texture2D" uid="uid://lshg07p00pw4" path="res://Art/MaterialTextures/Lava/Lava004_1K-PNG_Emission.png" id="2_rbvuf"]
+[ext_resource type="Texture2D" uid="uid://c3fekir2etgvl" path="res://Art/MaterialTextures/Lava/Lava004_1K-PNG_Displacement.png" id="3_ouarm"]
+[ext_resource type="Texture2D" uid="uid://cifodaa4qfvv" path="res://Art/MaterialTextures/Lava/Lava004_1K-PNG_Roughness.png" id="4_sxr2a"]
 
 [resource]
 shading_mode = 2

@@ -10,160 +10,125 @@ class_name ThirdPersonCamera extends Node3D
 @onready var _camera_marker := $RotationPivot/OffsetPivot/CameraSpringArm/CameraMarker
 @onready var _camera_shaker := $CameraShaker
 
-##
-@export var distance_from_pivot := 10.0 :
-	set(value) :
-		distance_from_pivot = value
-		_set_when_ready(^"RotationPivot/OffsetPivot/CameraSpringArm", &"spring_length", value)
+## 
+@export var att: ControllerAttributes = ControllerAttributes.new():
+	set(val):
+		if not val:
+			val = ControllerAttributes.new()
 
+		att = val
+		
+		if not att.pivot_distance_changed.is_connected(_on_pivot_distance_changed):
+			att.pivot_distance_changed.connect(_on_pivot_distance_changed)
 
-##
-@export var pivot_offset := Vector2.ZERO
-
-##
-@export_range(-90.0, 90.0) var initial_dive_angle_deg := -20.0 :
-	set(value) :
-		initial_dive_angle_deg = clampf(value, tilt_lower_limit_deg, tilt_upper_limit_deg)
-
-##
-@export_range(-90.0, 90.0) var tilt_upper_limit_deg := 60.0
-
-##
-@export_range(-90.0, 90.0) var tilt_lower_limit_deg := -60.0
-
-##
-@export_range(1.0, 1000.0) var tilt_sensitiveness := 10.0
-
-##
-@export_range(1.0, 1000.0) var horizontal_rotation_sensitiveness := 10.0
-
-##
-@export_range(0.1, 1) var camera_speed := 0.1
-
-##
-@export var current : bool = false :
-	set(value) :
-		current = value
-		_set_when_ready(^"Camera", &"current", value)
-
-##
+## Unused!
 @export_group("mouse")
 ##
-@export var mouse_follow : bool = false
+@export var mouse_follow: bool = false
 
 ##
-@export_range(0., 100.) var mouse_x_sensitiveness : float = 1
+@export_range(0.,100.) var mouse_x_sensitiveness: float = 1
 
 ##
-@export_range(0., 100.) var mouse_y_sensitiveness : float = 1
+@export_range(0.,100.) var mouse_y_sensitiveness: float = 1
 
 ##
 @export_group("Camera Shake")
 
 @export var shake_presets: Array[CameraShakePreset]
 
-
 # SpringArm3D properties replication
 @export_category("SpringArm3D")
-@export_flags_3d_render var spring_arm_collision_mask : int = 1 :
-	set(value) :
+@export_flags_3d_render var spring_arm_collision_mask: int = 1:
+	set(value):
 		spring_arm_collision_mask = value
 		_set_when_ready(^"RotationPivot/OffsetPivot/CameraSpringArm", &"collision_mask", value)
-@export_range(0.0, 100.0, 0.01, "or_greater", "or_less", "hide_slider", "suffix:m") var spring_arm_margin : float = 0.01 :
-	set(value) :
+
+@export_range(0.0, 100.0, 0.01, "or_greater", "or_less", "hide_slider", "suffix:m") var spring_arm_margin: float = 0.01:
+	set(value):
 		spring_arm_margin = value
 		_set_when_ready(^"RotationPivot/OffsetPivot/CameraSpringArm", &"margin", value)
 
-
 # Camera3D properties replication
 @export_category("Camera3D")
-@export var keep_aspect : Camera3D.KeepAspect = Camera3D.KEEP_HEIGHT
-@export_flags_3d_render var cull_mask : int = 1048575
-@export var environment : Environment
-@export var attributes : CameraAttributes
-@export var doppler_tracking : Camera3D.DopplerTracking = Camera3D.DOPPLER_TRACKING_DISABLED
-@export var projection : Camera3D.ProjectionType = Camera3D.PROJECTION_PERSPECTIVE
+@export var keep_aspect: Camera3D.KeepAspect = Camera3D.KEEP_HEIGHT
+@export_flags_3d_render var cull_mask: int = 1048575
+@export var environment: Environment
+@export var attributes: CameraAttributes
+@export var doppler_tracking: Camera3D.DopplerTracking = Camera3D.DOPPLER_TRACKING_DISABLED
+@export var projection: Camera3D.ProjectionType = Camera3D.PROJECTION_PERSPECTIVE
 @export_range(1.0, 179.0, 0.1, "suffix:°") var FOV = 75.0
 @export var near := 0.05
 @export var far := 4000.0
 
 
+var camera_tilt_deg: float = 0.0
+var camera_horizontal_rotation_deg: float = 0.0
 
-var camera_tilt_deg := 0.
-var camera_horizontal_rotation_deg := 0.
+func _on_pivot_distance_changed() -> void:
+	_set_when_ready(^"RotationPivot/OffsetPivot/CameraSpringArm", &"spring_length", att.distance_from_pivot)
 
-func _set_when_ready(node_path : NodePath, property_name : StringName, value : Variant) :
-	if not is_node_ready() :
+func _set_when_ready(node_path: NodePath, property_name: StringName, value: Variant) -> void:
+	if not is_node_ready():
 		await ready
 		get_node(node_path).set(property_name, value)
-	else :
+	else:
 		get_node(node_path).set(property_name, value)
 
-
-func _ready():
+func _ready() -> void:
 	_camera.top_level = true
 
-
-func _physics_process(_delta):
+func _physics_process(delta: float) -> void:
 
 	_update_camera_properties()
-	if Engine.is_editor_hint() :
-		_camera_marker.global_position = Vector3(0., 0., 1.).rotated(Vector3(1., 0., 0.), deg_to_rad(initial_dive_angle_deg)).rotated(Vector3(0., 1., 0.), deg_to_rad(-camera_horizontal_rotation_deg)) * _camera_spring_arm.spring_length + _camera_spring_arm.global_position
+
+	if Engine.is_editor_hint():
+		if att:
+			_camera_marker.global_position = Vector3(0.,0.,1.).rotated(Vector3(1.,0.,0.), deg_to_rad(att.initial_dive_angle_deg)).rotated(Vector3(0.,1.,0.), deg_to_rad(-camera_horizontal_rotation_deg)) * _camera_spring_arm.spring_length + _camera_spring_arm.global_position
 		pass
+
 	#_camera.global_position = _camera_marker.global_position
 	tweenCameraToMarker()
-	_camera_offset_pivot.global_position = _camera_offset_pivot.get_parent().to_global(Vector3(pivot_offset.x, pivot_offset.y, 0.0))
-	_camera_rotation_pivot.global_rotation_degrees.x = initial_dive_angle_deg
+	_camera_offset_pivot.global_position = _camera_offset_pivot.get_parent().to_global(Vector3(att.pivot_offset.x, att.pivot_offset.y, 0.0))
+	_camera_rotation_pivot.global_rotation_degrees.x = att.initial_dive_angle_deg
 	_camera_rotation_pivot.global_position = global_position
-	_process_tilt_input()
-	_process_horizontal_rotation_input()
+	
 	_update_camera_tilt()
 	_update_camera_horizontal_rotation()
+	# camera_horizontal_rotation_deg
 
 
-func tweenCameraToMarker() :
-	_camera.global_position = lerp(_camera.global_position, _camera_marker.global_position, camera_speed)
-
-func _process_horizontal_rotation_input() :
-	if InputMap.has_action("tp_camera_right") and InputMap.has_action("tp_camera_left") :
-		var camera_horizontal_rotation_variation = Input.get_action_strength("tp_camera_right") -  Input.get_action_strength("tp_camera_left")
-		camera_horizontal_rotation_variation = camera_horizontal_rotation_variation * get_process_delta_time() * 30 * horizontal_rotation_sensitiveness
-		camera_horizontal_rotation_deg += camera_horizontal_rotation_variation
+func process_tilt_input(tilt_variation: float, delta: float) -> void:
+	tilt_variation = tilt_variation * delta * 5 * att.tilt_sensitiveness
+	camera_tilt_deg = clamp(camera_tilt_deg + tilt_variation, att.tilt_lower_limit_deg - att.initial_dive_angle_deg, att.tilt_upper_limit_deg - att.initial_dive_angle_deg)
 
 
-func _process_tilt_input() :
-	if InputMap.has_action("tp_camera_up") and InputMap.has_action("tp_camera_down") :
-		var tilt_variation = Input.get_action_strength("tp_camera_up") -  Input.get_action_strength("tp_camera_down")
-		tilt_variation = tilt_variation * get_process_delta_time() * 5 * tilt_sensitiveness
-		camera_tilt_deg = clamp(camera_tilt_deg + tilt_variation, tilt_lower_limit_deg - initial_dive_angle_deg, tilt_upper_limit_deg - initial_dive_angle_deg)
+func tweenCameraToMarker() -> void:
+	_camera.global_position = lerp(_camera.global_position, _camera_marker.global_position, att.camera_speed)
 
-
-
-func _update_camera_tilt() :
-	var tilt_final_val = clampf(initial_dive_angle_deg + camera_tilt_deg, tilt_lower_limit_deg, tilt_upper_limit_deg)
+func _update_camera_tilt() -> void:
+	var tilt_final_val = clampf(att.initial_dive_angle_deg + camera_tilt_deg, att.tilt_lower_limit_deg, att.tilt_upper_limit_deg)
 	var tween = create_tween()
 	tween.tween_property(_camera, "global_rotation_degrees:x", tilt_final_val, 0.1)
 
 
-func _update_camera_horizontal_rotation() :
-	# TODO : inverse
-	var tween = create_tween()
+func _update_camera_horizontal_rotation() -> void:
+	var tween: Tween = create_tween()
 	tween.tween_property(_camera_rotation_pivot, "global_rotation_degrees:y", camera_horizontal_rotation_deg * -1, 0.1).as_relative()
 	camera_horizontal_rotation_deg = 0.0 # reset the value
-	var vect_to_offset_pivot : Vector2 = (
+	var vect_to_offset_pivot: Vector2 = (
 		Vector2(_camera_offset_pivot.global_position.x, _camera_offset_pivot.global_position.z)
 		-
 		Vector2(_camera.global_position.x, _camera.global_position.z)
 		).normalized()
-	_camera.global_rotation.y = -Vector2(0., -1.).angle_to(vect_to_offset_pivot.normalized())
+	_camera.global_rotation.y = -Vector2(0., - 1.).angle_to(vect_to_offset_pivot.normalized())
 
 
-func apply_preset_shake(preset_number: int) :
+func apply_preset_shake(preset_number: int) -> void:
 	_camera_shaker.apply_preset_shake(shake_presets[preset_number])
 
 
-
-func _unhandled_input(event):
+func _unhandled_input(event: InputEvent) -> void:
 	if mouse_follow and event is InputEventMouseMotion:
 		camera_horizontal_rotation_deg += event.relative.x * 0.1 * mouse_x_sensitiveness
 		camera_tilt_deg -= event.relative.y * 0.07 * mouse_y_sensitiveness
@@ -172,7 +137,7 @@ func _unhandled_input(event):
 	pass
 
 
-func _update_camera_properties() :
+func _update_camera_properties() -> void:
 	_camera.keep_aspect = keep_aspect
 	_camera.cull_mask = cull_mask
 	_camera.doppler_tracking = doppler_tracking
@@ -180,27 +145,28 @@ func _update_camera_properties() :
 	_camera.fov = FOV
 	_camera.near = near
 	_camera.far = far
-	if _camera.environment != environment :
+	if _camera.environment != environment:
 		_camera.environment = environment
-	if _camera.attributes != attributes :
+	if _camera.attributes != attributes:
 		_camera.attributes = attributes
 
 
-func get_camera() :
+func get_camera() -> Camera3D:
 	return $Camera
 
 
-func get_front_direction() :
-	var dir : Vector3 = _camera_offset_pivot.global_position - _camera.global_position
+func get_front_direction() -> Vector3:
+	var dir: Vector3 = _camera_offset_pivot.global_position - _camera.global_position
 	dir.y = 0.
 	dir = dir.normalized()
 	return dir
 
-func get_back_direction() :
+
+func get_back_direction() -> Vector3:
 	return -get_front_direction()
 
-func get_left_direction() :
-	return get_front_direction().rotated(Vector3.UP, PI/2)
+func get_left_direction() -> Vector3:
+	return get_front_direction().rotated(Vector3.UP, PI / 2)
 
-func get_right_direction() :
-	return get_front_direction().rotated(Vector3.UP, -PI/2)
+func get_right_direction() -> Vector3:
+	return get_front_direction().rotated(Vector3.UP, -PI / 2)

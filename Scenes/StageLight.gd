@@ -1,0 +1,1 @@
+class_name StageLight extends SpotLight3D

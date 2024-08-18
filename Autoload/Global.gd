@@ -1,6 +1,6 @@
 extends Node
 
-var germ: Germ
+var marble: Marble
 var cam: Camera3D
 
 
