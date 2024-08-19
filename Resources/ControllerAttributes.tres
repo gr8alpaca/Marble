@@ -5,10 +5,12 @@
 [resource]
 script = ExtResource("1_yqqw3")
 distance_from_pivot = 3.0
-pivot_offset = Vector2(0, 0)
+camera_y_offset = 0.5
+pivot_offset = Vector2(0, 0.5)
 initial_dive_angle_deg = -17.0
-tilt_upper_limit_deg = 60.0
-tilt_lower_limit_deg = -60.0
+tilt_upper_limit_deg = -3.0
+tilt_lower_limit_deg = -31.0
+roll_limit_deg = 15.0
 tilt_sensitiveness = 10.0
 horizontal_rotation_sensitiveness = 10.0
 camera_speed = 0.1

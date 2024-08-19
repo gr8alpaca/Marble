@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://cr22q56os5e5p"]
+
+[ext_resource type="Script" path="res://Scripts/Cam.gd" id="1_q08c8"]
+[ext_resource type="PackedScene" uid="uid://6c5fk2s6k30o" path="res://Scenes/debug.tscn" id="2_xipya"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2bjii"]
+albedo_color = Color(0.8, 0.686275, 0.215686, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_4q87v"]
+material = SubResource("StandardMaterial3D_2bjii")
+radius = 0.05
+height = 0.1
+
+[node name="Cam" type="Node3D" node_paths=PackedStringArray("rotate_handler", "cam")]
+script = ExtResource("1_q08c8")
+rotate_handler = NodePath("RotateHandler")
+cam = NodePath("RotateHandler/Camera3D")
+
+[node name="RotateHandler" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="Camera3D" type="Camera3D" parent="RotateHandler"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.973078, 0.230474, 0, -0.230474, 0.973078, 0, 1.30666, 3.40577)
+
+[node name="Debug" parent="RotateHandler/Camera3D" instance=ExtResource("2_xipya")]
+
+[node name="PivotDebug" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+visible = false
+mesh = SubResource("SphereMesh_4q87v")

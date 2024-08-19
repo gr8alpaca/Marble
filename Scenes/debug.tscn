@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3 uid="uid://6c5fk2s6k30o"]
+
+[ext_resource type="Script" path="res://Scenes/Debug.gd" id="1_drrg0"]
+
+[sub_resource type="Theme" id="Theme_b5tbf"]
+default_font_size = 20
+
+[node name="Debug" type="CanvasLayer" node_paths=PackedStringArray("table_container")]
+layer = 16
+script = ExtResource("1_drrg0")
+table_container = NodePath("MarginContainer/VBox")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_b5tbf")
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+metadata/_edit_lock_ = true
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="MarginContainer/VBox"]
+layout_mode = 2
+text = "Debug..."

@@ -1,83 +1,71 @@
+@icon("res://Art/ClassIcons16x16/character.png")
 class_name Marble extends RigidBody3D
 
-@export var tpc: ThirdPersonCamera
-@export var cam: Camera3D
+
+@export var ATT: ControllerAttributes = Global.ATT:
+	set(val):
+		ATT = Global.ATT
+
 
 @export var input_active: bool = true:
-    set(val):
-        input_active = val
-        set_process_input(val)
-        set_process_unhandled_input(val)
+	set(val):
+		input_active = val
+		set_process_input(val)
+		set_process_unhandled_input(val)
+		
+@export_group("Nodes")
 
+@export var cam: Cam
 
 @export_category("Movement")
 
-@export var att: ControllerAttributes = ControllerAttributes.new()
-
-# @export_range(6.0, 14.0, 0.1, "or_greater", "or_less")
-# var gravity_magnitude: float = 9.8
-
-# @export_range(1.0, 10.0, 0.5, "or_greater", "or_less")
-# var directional_acceleration: float = 4.0
-
+@export_range(1.0, 4.0, 0.2, "or_greater", "or_less")
+var roll_speed: float = 3.0
+# @export var att: ControllerAttributes = ControllerAttributes.new()
 
 const MAX_TILT_DEGREES: float = 20.0
 @export_range(1.0, 4.0, 0.2, "or_greater", "or_less")
 var tilt_sensitivity: float = 1.0
 
-@export_range(1.0, 4.0, 0.2, "or_greater", "or_less")
-var tilt_speed_radians_second: float = PI
+@export_range(TAU, TAU * 4, PI / 2, "or_greater", "or_less")
+var tilt_speed_radians_second: float = TAU * 3
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 
+var data: Dictionary = {"Input": Vector2(), "LinVel": 0.0, "Pitch": 0.0, "Roll": 0.0}
+signal update_debug
 
-func _init() -> void:
-    Global.marble = self
-    Global.cam = cam
-
-
-func _physics_process(delta: float) -> void:
-    if Engine.is_editor_hint(): return
-
-    var gravity_vector: Vector3 = Vector3.DOWN * gravity
-
-    var input: Vector2 = Vector2(
-        Input.get_action_strength(&"move_right") - Input.get_action_strength(&"move_left"),
-        Input.get_action_strength(&"move_down") - Input.get_action_strength(&"move_up"), )
-    
-    var forward_tilt_degrees: float = 0.0
-    var horizontal_tilt_degrees: float
-    
-    if input_active:
-        var forward_tilt_delta: float = input.y * delta * 5.0 * tilt_sensitivity
-        forward_tilt_degrees = clamp(tpc.camera_tilt_deg + forward_tilt_delta, tpc.tilt_lower_limit_deg - tpc.initial_dive_angle_deg, tpc.tilt_upper_limit_deg - tpc.initial_dive_angle_deg)
+func _ready() -> void:
+	Global.marble = self
+	Global.cam = cam.cam
+	update_debug.connect(get_node("%Debug").create_table("Marble", data))
 
 
-    else:
-        pass
-    
-    tpc.camera_tilt_deg = forward_tilt_degrees
-    apply_central_force(gravity_vector)
-    # var acc: Vector3 = Vector3(input.x * directional_acceleration * delta, 0, input.y * directional_acceleration * delta, )
-    
-    
-    process_swivel(Vector2(linear_velocity.x, linear_velocity.z), delta)
+func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	const TILT_MOVE_TIME_DEGREES_PER_SECOND: float = 360.0
+	if Engine.is_editor_hint(): return
+
+	var input: Vector2 = Vector2(
+		Input.get_action_strength(&"move_right") - Input.get_action_strength(&"move_left"),
+        Input.get_action_strength(&"move_down") - Input.get_action_strength(&"move_up"), ) if input_active else Vector2.ZERO
+	
+	var yaw: float = cam.get_yaw()
+	input = input.rotated(-yaw)
+
+	var x_inp: float = input.x * 5.0 * tilt_sensitivity
+	var z_inp: float = input.y * 5.0 * tilt_sensitivity
+
+	var x_force: float = x_inp * roll_speed
+	var z_force: float = z_inp * roll_speed
+
+	state.apply_central_force(Vector3(x_force, 0, z_force) * roll_speed)
 
 
+	data["Input"] = input
+	data["LinVel"] = linear_velocity
+	# data["Pitch"] = ATT.pitch
+	# data["Roll"] = ATT.roll
 
+	cam.update_cam(input, state)
 
-func process_swivel(velocity: Vector2, delta: float) -> void:
-    # marble.linear_velocity
-	# _camera.position.angle
-	# camera_horizontal_rotation_deg
-    pass
-
-# func _get_property_list() -> Array:
-#     var result: Array = []
-
-#     if tpc:
-#         for property: Dictionary in tpc.get_property_list():
-#             match property["name"]:
-#                 "tilt_lower_limit_deg"
-
-#     return []
+	update_debug.emit()
