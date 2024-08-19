@@ -54,20 +54,25 @@ func update_rotation() -> void:
 
 func update_yaw(state: PhysicsDirectBodyState3D) -> void:
 	const YAW_SPEED: float = 0.2
-
+	const VELOCITY_CAM_MAX_SPEED: float = 30.0
+	const MAX_RADIANS_PER_SECOND: float = PI
+	const DEFAULT_VELOCITY_DIR: = Vector2.UP
 	var vel_dir: Vector2 = Vector2(state.linear_velocity.x, state.linear_velocity.z, )
-	var y_rot: float = move_toward(rotate_handler.global_rotation.y, vel_dir.angle_to(Vector2.UP), YAW_SPEED * vel_dir.length() * state.step)
+	var cam_dir: Vector2 = get_camera_dir()
+	var vel_norm: Vector2 = vel_dir.normalized()
+	var ang_delta: float = vel_norm.angle() - DEFAULT_VELOCITY_DIR.angle() 
+	var t: float =  (vel_dir.length()*state.step)
+
+	var rotated_angle: float = lerp_angle(rotate_handler.global_rotation.y, -ang_delta, t)
+	var max_move: float = state.step * MAX_RADIANS_PER_SECOND
+	var new_ang: float = move_toward(rotate_handler.global_rotation.y, rotated_angle, max_move)
+	rotate_handler.global_rotation.y = new_ang #clampf( rotated_angle, rotated_angle - max_move, rotated_angle + max_move)
+
+	print("Y: %0.3f " % (rotate_handler.global_rotation_degrees.y))
+
+func get_camera_dir() -> Vector2:
+	var position_deltas:= global_position - cam.global_position
+	return Vector2(position_deltas.x, position_deltas.z).normalized()
 	
-	# lerp(rotate_handler.global_rotation.y, vel_dir.angle_to(Vector2.UP), 0.1)
-	# move_toward(rotate_handler.global_rotation.y, vel_dir.angle_to(Vector2.UP), YAW_SPEED * vel_dir.length() * state.step)
-
-	print("Y: %0.3f " % rad_to_deg(y_rot))
-	# create_tween().tween_property(rotate_handler, "rotation:y", y_rot, 0.1)
-	rotate_handler.global_rotation.y = y_rot
-	# rotate_handler.global_rotation.y = move_toward(rotate_handler.global_rotation.y, vel_dir.angle_to(Vector2.UP), YAW_SPEED * vel_dir.length() * state.step)
-
-	# var : Vector2 = (
-	# 	Vector2(global_position.x, global_position.z) - Vector2(cam.global_position.x, cam.global_position.z)).normalized()
-
 func get_yaw() -> float:
 	return rotate_handler.global_rotation.y

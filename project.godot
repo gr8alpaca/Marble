@@ -37,11 +37,9 @@ gdscript/warnings/int_as_enum_without_match=0
 
 [display]
 
+window/size/viewport_width=640
+window/size/viewport_height=360
 window/size/always_on_top=true
-
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/third-person-camera/plugin.cfg")
 
 [file_customization]
 

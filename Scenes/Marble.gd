@@ -47,13 +47,14 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 
 	var input: Vector2 = Vector2(
 		Input.get_action_strength(&"move_right") - Input.get_action_strength(&"move_left"),
-        Input.get_action_strength(&"move_down") - Input.get_action_strength(&"move_up"), ) if input_active else Vector2.ZERO
+		Input.get_action_strength(&"move_down") - Input.get_action_strength(&"move_up"), ) if input_active else Vector2.ZERO
 	
 	var yaw: float = cam.get_yaw()
-	input = input.rotated(-yaw)
+	var local_input: Vector2 = input.rotated(-yaw)
+	#input = input.rotated(-yaw)
 
-	var x_inp: float = input.x * 5.0 * tilt_sensitivity
-	var z_inp: float = input.y * 5.0 * tilt_sensitivity
+	var x_inp: float = local_input.x * 5.0 * tilt_sensitivity
+	var z_inp: float = local_input.y * 5.0 * tilt_sensitivity
 
 	var x_force: float = x_inp * roll_speed
 	var z_force: float = z_inp * roll_speed
